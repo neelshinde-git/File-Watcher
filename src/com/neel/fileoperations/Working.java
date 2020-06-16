@@ -1,9 +1,12 @@
 package com.neel.fileoperations;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -69,6 +72,29 @@ public class Working {
                 FileOperations.moveFile(criteria);
             }else if(criteria.getAction().equals("RENAME")){
                 FileOperations.renameFile(criteria);
+            }
+        }
+    }
+
+    public static File[] getLogFiles(){
+        File f = new File(logFilePath);
+        FilenameFilter filter = (dir, name) -> {
+            return name.matches("File_Watcher_(.*)");
+        };
+        return f.listFiles(filter);
+    }
+
+    public static void deleteOldLogs(int days){
+        File[] logs = getLogFiles();
+        if(logs.length>0) {
+            SimpleDateFormat dtf = new SimpleDateFormat("ddMMyyyy");
+            DateTimeFormatter format = DateTimeFormatter.ofPattern("ddMMyyyy");
+            long difference = System.currentTimeMillis() - (days * 24 * 60 * 60 * 1000L);
+
+            for (File log : logs) {
+                if(log.lastModified()<difference) {
+                    Working.writeLogs("Deleting Log : " + log.getAbsolutePath() + " success : " + log.delete());
+                }
             }
         }
     }
